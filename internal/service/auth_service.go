@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"github.com/GlebPoroshin/geochat-auth-service/internal/models"
+	"github.com/GlebPoroshin/geochat-auth-service/internal/repository"
 	sharedJWT "github.com/GlebPoroshin/geochat-shared/jwt"
 	"github.com/google/uuid"
 	"golang.org/x/crypto/bcrypt"
@@ -13,15 +14,15 @@ import (
 )
 
 type authService struct {
-	userRepo         UserRepository
-	verificationRepo VerificationRepository
+	userRepo         repository.UserRepository
+	verificationRepo repository.VerificationRepository
 	emailService     EmailService
 	jwtSecret        string
 }
 
 func NewAuthService(
-	userRepo UserRepository,
-	verificationRepo VerificationRepository,
+	userRepo repository.UserRepository,
+	verificationRepo repository.VerificationRepository,
 	emailService EmailService,
 	jwtSecret string,
 ) AuthService {
@@ -81,8 +82,8 @@ func (s *authService) Register(ctx context.Context, login, email, password strin
 }
 
 func (s *authService) VerifyRegistration(ctx context.Context, userID, code string) error {
-	var verificationCode models.VerificationCode
-	if err := s.verificationRepo.FindValid(ctx, userID, code, "registration"); err != nil {
+	verificationCode, err := s.verificationRepo.FindValid(ctx, userID, code, "registration")
+	if err != nil {
 		return errors.New("invalid or expired verification code")
 	}
 
@@ -90,7 +91,7 @@ func (s *authService) VerifyRegistration(ctx context.Context, userID, code strin
 		return err
 	}
 
-	return s.verificationRepo.Delete(ctx, &verificationCode)
+	return s.verificationRepo.Delete(ctx, verificationCode)
 }
 
 func (s *authService) Login(ctx context.Context, loginOrEmail, password string) (AuthResponse, error) {
@@ -146,7 +147,7 @@ func (s *authService) VerifyPasswordResetCode(ctx context.Context, email, code s
 		return errors.New("user not found")
 	}
 
-	verificationCode, err := s.verificationRepo.FindValid(ctx, user.ID, code, "password_reset")
+	_, err = s.verificationRepo.FindValid(ctx, user.ID, code, "password_reset")
 	if err != nil {
 		return errors.New("invalid or expired verification code")
 	}
@@ -168,7 +169,7 @@ func (s *authService) ResetPassword(ctx context.Context, email, newPassword stri
 	return s.userRepo.UpdatePassword(ctx, user.ID, string(hashedPassword))
 }
 
-func (s *authService) RefreshToken(ctx context.Context, userID, refreshToken string) (AuthResponse, error) {
+func (s *authService) RefreshToken(_ context.Context, userID, refreshToken string) (AuthResponse, error) {
 	claims, err := sharedJWT.Validate(refreshToken)
 	if err != nil {
 		return AuthResponse{}, errors.New("invalid refresh token")

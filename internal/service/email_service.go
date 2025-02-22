@@ -1,7 +1,8 @@
-package email
+package service
 
 import (
 	"fmt"
+	"github.com/GlebPoroshin/geochat-auth-service/internal/config"
 	"net/smtp"
 )
 
@@ -9,7 +10,7 @@ type emailService struct {
 	config *config.Config
 }
 
-func NewEmailService(config *config.Config) service.EmailService {
+func NewEmailService(config *config.Config) EmailService {
 	return &emailService{
 		config: config,
 	}
@@ -38,4 +39,4 @@ func (s *emailService) sendEmail(to, subject, body string) error {
 
 	addr := fmt.Sprintf("%s:%d", s.config.SMTPHost, s.config.SMTPPort)
 	return smtp.SendMail(addr, auth, s.config.SMTPUsername, []string{to}, []byte(msg))
-} 
+}

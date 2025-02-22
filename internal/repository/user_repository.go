@@ -2,18 +2,9 @@ package repository
 
 import (
 	"context"
-
+	"github.com/GlebPoroshin/geochat-auth-service/internal/models"
 	"gorm.io/gorm"
-
-	"geochat-auth-service/internal/models"
 )
-
-type UserRepository interface {
-	FindByLoginOrEmail(ctx context.Context, loginOrEmail string) (*models.User, error)
-	Create(ctx context.Context, user *models.User) error
-	UpdateVerificationStatus(ctx context.Context, userID string, verified bool) error
-	UpdatePassword(ctx context.Context, userID string, hashedPassword string) error
-}
 
 type userRepository struct {
 	db *gorm.DB
@@ -41,4 +32,4 @@ func (r *userRepository) UpdateVerificationStatus(ctx context.Context, userID st
 
 func (r *userRepository) UpdatePassword(ctx context.Context, userID string, hashedPassword string) error {
 	return r.db.Model(&models.User{}).Where("id = ?", userID).Update("password", hashedPassword).Error
-} 
+}

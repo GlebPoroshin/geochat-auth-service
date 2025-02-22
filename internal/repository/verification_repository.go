@@ -2,18 +2,10 @@ package repository
 
 import (
 	"context"
-	"time"
-
+	"github.com/GlebPoroshin/geochat-auth-service/internal/models"
 	"gorm.io/gorm"
-
-	"geochat-auth-service/internal/models"
+	"time"
 )
-
-type VerificationRepository interface {
-	Create(ctx context.Context, code *models.VerificationCode) error
-	FindValid(ctx context.Context, userID, code, codeType string) (*models.VerificationCode, error)
-	Delete(ctx context.Context, code *models.VerificationCode) error
-}
 
 type verificationRepository struct {
 	db *gorm.DB
@@ -31,7 +23,7 @@ func (r *verificationRepository) FindValid(ctx context.Context, userID, code, co
 	var verificationCode models.VerificationCode
 	if err := r.db.Where(
 		"user_id = ? AND code = ? AND type = ? AND expires_at > ?",
-		userId, code, codeType, time.Now(),
+		userID, code, codeType, time.Now(),
 	).First(&verificationCode).Error; err != nil {
 		return nil, err
 	}
@@ -40,4 +32,4 @@ func (r *verificationRepository) FindValid(ctx context.Context, userID, code, co
 
 func (r *verificationRepository) Delete(ctx context.Context, code *models.VerificationCode) error {
 	return r.db.Delete(code).Error
-} 
+}
