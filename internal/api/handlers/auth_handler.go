@@ -3,7 +3,9 @@ package handlers
 import (
 	"github.com/GlebPoroshin/geochat-auth-service/internal/api/dto"
 	"github.com/GlebPoroshin/geochat-auth-service/internal/service"
+	sharedJWT "github.com/GlebPoroshin/geochat-shared/jwt"
 	"github.com/gofiber/fiber/v2"
+	"strings"
 )
 
 type AuthHandler struct {
@@ -132,14 +134,13 @@ func (h *AuthHandler) ResetPassword(c *fiber.Ctx) error {
 }
 
 func (h *AuthHandler) RefreshToken(c *fiber.Ctx) error {
-	var req dto.RefreshTokenRequest
-	if err := c.BodyParser(&req); err != nil {
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-			"error": "Invalid request body",
-		})
-	}
+	refreshToken := c.Get("Authorization")
+	parts := strings.Split(refreshToken, " ")
 
-	response, err := h.authService.RefreshToken(c.Context(), req.UserID, req.RefreshToken)
+	claims, _ := sharedJWT.Validate(parts[1])
+	userID := claims.Subject
+
+	response, err := h.authService.RefreshToken(c.Context(), userID, parts[1])
 	if err != nil {
 		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
 			"error": err.Error(),

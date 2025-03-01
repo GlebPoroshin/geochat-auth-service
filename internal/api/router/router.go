@@ -24,7 +24,7 @@ func SetupRoutes(app *fiber.App, authHandler *handlers.AuthHandler) {
 
 	// Требуют токен в хедере
 	protected := auth.Use(middleware.RequireAuth)
-	protected.Post("/refresh", authHandler.RefreshToken)
+	protected.Get("/refresh", authHandler.RefreshToken)
 	
 	app.Use(func(c *fiber.Ctx) error {
 		return c.Status(fiber.StatusNotFound).JSON(fiber.Map{
