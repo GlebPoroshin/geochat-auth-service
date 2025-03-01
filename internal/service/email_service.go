@@ -37,6 +37,6 @@ func (s *emailService) sendEmail(to, subject, body string) error {
 		"\r\n"+
 		"%s\r\n", s.config.SMTPUsername, to, subject, body)
 
-	addr := fmt.Sprintf("%s:%d", s.config.SMTPHost, s.config.SMTPPort)
+	addr := fmt.Sprintf("%s:%s", s.config.SMTPHost, s.config.SMTPPort)
 	return smtp.SendMail(addr, auth, s.config.SMTPUsername, []string{to}, []byte(msg))
 }
