@@ -1,6 +1,13 @@
+// @title Auth Service API
+// @version 1.0
+// @description API сервиса авторизации
+// @host localhost:8081
+// @BasePath /auth
+// @schemes http
 package main
 
 import (
+	"github.com/GlebPoroshin/geochat-auth-service/docs"
 	"github.com/GlebPoroshin/geochat-auth-service/internal/api/handlers"
 	"github.com/GlebPoroshin/geochat-auth-service/internal/api/router"
 	"github.com/GlebPoroshin/geochat-auth-service/internal/config"
@@ -9,8 +16,11 @@ import (
 	"github.com/GlebPoroshin/geochat-auth-service/internal/service"
 	sharedJWT "github.com/GlebPoroshin/geochat-shared/jwt"
 	"github.com/gofiber/fiber/v2"
+
+	_ "github.com/gofiber/swagger"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
+
 	"log"
 )
 
@@ -21,6 +31,14 @@ func main() {
 	}
 
 	sharedJWT.Init(cfg.JWTSecret)
+
+	// Инициализация Swagger
+	docs.SwaggerInfo.Title = "Auth Service API"
+	docs.SwaggerInfo.Description = "API сервиса авторизации"
+	docs.SwaggerInfo.Version = "1.0"
+	docs.SwaggerInfo.Host = cfg.ServerAddress
+	docs.SwaggerInfo.BasePath = "/auth"
+	docs.SwaggerInfo.Schemes = []string{"http"}
 
 	db, err := initDB(cfg)
 	if err != nil {

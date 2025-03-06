@@ -1,0 +1,257 @@
+basePath: /auth
+definitions:
+  dto.LoginRequest:
+    properties:
+      login_or_email:
+        type: string
+      password:
+        type: string
+    type: object
+  dto.PasswordResetRequest:
+    properties:
+      email:
+        type: string
+    type: object
+  dto.RegisterRequest:
+    properties:
+      email:
+        type: string
+      login:
+        type: string
+      password:
+        type: string
+    type: object
+  dto.ResetPasswordRequest:
+    properties:
+      email:
+        type: string
+      new_password:
+        type: string
+    type: object
+  dto.VerifyPasswordResetRequest:
+    properties:
+      code:
+        type: string
+      email:
+        type: string
+    type: object
+  dto.VerifyRegistrationRequest:
+    properties:
+      code:
+        type: string
+      user_id:
+        type: string
+    type: object
+host: localhost:8081
+info:
+  contact: {}
+  description: API сервиса авторизации
+  title: Auth Service API
+  version: "1.0"
+paths:
+  /auth/login:
+    post:
+      consumes:
+      - application/json
+      description: Авторизует пользователя по логину или email и паролю
+      parameters:
+      - description: Данные для входа
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/dto.LoginRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Успешный вход
+          schema:
+            additionalProperties: true
+            type: object
+        "401":
+          description: Неверные учетные данные
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Вход пользователя
+      tags:
+      - auth
+  /auth/password-reset:
+    post:
+      consumes:
+      - application/json
+      description: Отправляет код сброса пароля на email пользователя
+      parameters:
+      - description: Email пользователя
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/dto.PasswordResetRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Код сброса отправлен
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: Ошибка при отправке
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Запрос на сброс пароля
+      tags:
+      - auth
+  /auth/refresh:
+    get:
+      consumes:
+      - application/json
+      description: Обновляет токен доступа, используя refresh-токен
+      parameters:
+      - description: Bearer RefreshToken
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Новый токен
+          schema:
+            additionalProperties: true
+            type: object
+        "401":
+          description: Ошибка авторизации
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Обновление токена
+      tags:
+      - auth
+  /auth/register:
+    post:
+      consumes:
+      - application/json
+      description: Создает нового пользователя по логину, email и паролю
+      parameters:
+      - description: Данные для регистрации
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/dto.RegisterRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Успешная регистрация
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Некорректный запрос
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Регистрация пользователя
+      tags:
+      - auth
+  /auth/reset-password:
+    post:
+      consumes:
+      - application/json
+      description: Устанавливает новый пароль после верификации кода
+      parameters:
+      - description: Email и новый пароль
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/dto.ResetPasswordRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Пароль успешно сброшен
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: Ошибка при сбросе пароля
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Сброс пароля
+      tags:
+      - auth
+  /auth/verify-registration:
+    post:
+      consumes:
+      - application/json
+      description: Подтверждает email пользователя с помощью кода верификации
+      parameters:
+      - description: Данные для верификации
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/dto.VerifyRegistrationRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Email подтвержден
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: Ошибка в коде верификации
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Подтверждение регистрации
+      tags:
+      - auth
+  /auth/verify-reset-code:
+    post:
+      consumes:
+      - application/json
+      description: Проверяет корректность введенного кода для сброса пароля
+      parameters:
+      - description: Email и код сброса
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/dto.VerifyPasswordResetRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Код сброса подтвержден
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: Неверный код
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Проверка кода сброса пароля
+      tags:
+      - auth
+schemes:
+- http
+swagger: "2.0"

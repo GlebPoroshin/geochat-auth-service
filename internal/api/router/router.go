@@ -6,6 +6,7 @@ import (
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/logger"
 	"github.com/gofiber/fiber/v2/middleware/recover"
+	"github.com/gofiber/swagger"
 )
 
 func SetupRoutes(app *fiber.App, authHandler *handlers.AuthHandler) {
@@ -21,11 +22,16 @@ func SetupRoutes(app *fiber.App, authHandler *handlers.AuthHandler) {
 	auth.Post("/password-reset", authHandler.InitiatePasswordReset)
 	auth.Post("/verify-reset-code", authHandler.VerifyPasswordResetCode)
 	auth.Post("/reset-password", authHandler.ResetPassword)
+	app.Get("/swagger/*", swagger.New(swagger.Config{
+		URL:         "/swagger/doc.json",
+		DeepLinking: true,
+		Title:       "Auth Service API Documentation",
+	}))
 
 	// Требуют токен в хедере
 	protected := auth.Use(middleware.RequireAuth)
 	protected.Get("/refresh", authHandler.RefreshToken)
-	
+
 	app.Use(func(c *fiber.Ctx) error {
 		return c.Status(fiber.StatusNotFound).JSON(fiber.Map{
 			"error": "Endpoint not found",

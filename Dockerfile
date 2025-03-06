@@ -15,11 +15,12 @@ WORKDIR /app/geochat-auth-service
 
 RUN go mod download
 
-#RUN CGO_ENABLED=0 GOOS=linux go build -o /auth-service ./cmd/main.go
-RUN go build -o /auth-service ./cmd/auth-service
+RUN CGO_ENABLED=0 GOOS=linux go build -o /app/auth-service ./cmd/main.go
 
 FROM alpine:latest
+
 WORKDIR /app
-COPY --from=builder /auth-service .
-EXPOSE 8081
-CMD ["./auth-servic"]
+
+COPY --from=builder /app/auth-service /app/auth-service
+
+CMD ["/app/auth-service"]
